@@ -1,14 +1,9 @@
 
-//Push check
 
-#include<Time.h>
+
 #include <LedControl.h> //  need the library
 
 LedControl lc = LedControl(12, 11, 10, 1); //  pin 12: DataIn, pin 11: CLK, pin 10: LOAD
-
-//Time code
-#define TIME_HEADER "T"
-#define TIME_REQUEST 7
 
 
 
@@ -19,19 +14,18 @@ void setup() {
   lc.setIntensity(0, 15); // sets brightness (0~15 possible values)
   lc.clearDisplay(0);// clear screen
 
-  //Time code
-  setSyncProvider(requestSync);
-  Serial.println("Waiting for sync time");
+
 
 }
 
 
+//*********LED MATRIX TESTING************//
 long int lInt = 1234567890; //test int to parse to display
 
-int epoch[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
-                 (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10,
-                };
-
+int epochTest[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
+                     (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10,
+                    };
+//********END LED MATRIX TESTING********//
 
 
 //number for first led matrix
@@ -68,11 +62,6 @@ byte nine[7] = {
 
 
 
-
-
-
-
-
 //number for second led matrix
 byte zero2[7] = {
   B00000111, B00000100, B00000100, B00000100, B00000111, B10001000, B11111000
@@ -106,20 +95,9 @@ byte nine2[7] = {
 };
 
 
-
-byte show[7] = {
-  zero[0] | five2[0], zero[1] | five2[1], zero[2] | five2[2], zero[3] | five2[3], zero[4] | five2[4], zero[5] | five2[5], zero[6] | five2[6]
-};
-
-
-
-
-
-
-
-
 byte tmpArray[7];
 byte tmpArrayTwo[7];
+
 
 void matrixOne(byte x[7]) {
   for (int i = 0; i < 7; i++) {
@@ -127,6 +105,7 @@ void matrixOne(byte x[7]) {
   }
 
 }
+
 
 void matrixTwo(byte y[7]) {
   for (int i = 0; i < 7; i++) {
@@ -173,6 +152,7 @@ void getNumOne(int x) {
   }
 }
 
+
 void getNumTwo(int y) {
 
   if (y == 0) {
@@ -208,77 +188,71 @@ void getNumTwo(int y) {
 }
 
 
-void displayNum(byte x[7], byte y[7]) {
-  lc.setRow(0, 0, x[6] | y[6]);
-  lc.setRow(0, 1, x[5] | y[5]);
-  lc.setRow(0, 2, x[4] | y[4]);
-  lc.setRow(0, 3, x[3] | y[3]);
-  lc.setRow(0, 4, x[2] | y[2]);
-  lc.setRow(0, 5, x[1] | y[1]);
-  lc.setRow(0, 6, x[0] | y[0]);
+void displayNum(int chipNum, byte x[7], byte y[7]) {
+  lc.setRow(chipNum, 0, x[6] | y[6]);
+  lc.setRow(chipNum, 1, x[5] | y[5]);
+  lc.setRow(chipNum, 2, x[4] | y[4]);
+  lc.setRow(chipNum, 3, x[3] | y[3]);
+  lc.setRow(chipNum, 4, x[2] | y[2]);
+  lc.setRow(chipNum, 5, x[1] | y[1]);
+  lc.setRow(chipNum, 6, x[0] | y[0]);
 }
 
 
-
-void displatEpochTime(long int eTime){ //Displays the epoch time on the 10 LED matrics
+//Displays the epoch time on the 10 LED matrics
+void displayEpochTime(long int eTime) {
 
   long int lInt = eTime;
 
   int epoch[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
-                 (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10,
-                };
+                   (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10,
+                  };
 
-  
-
-  
-}
-
-
-//Time code
-void digitalClockDisplay() {
-  // digital clock display of the time
-  Serial.println(static_cast<long int> (now()));
-}
-
-void processSyncMessage() {
-  unsigned long pctime;
-  const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
-
-  if (Serial.find(TIME_HEADER)) {
-    pctime = Serial.parseInt();
-    if ( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
-      setTime(pctime); // Sync Arduino clock to the time received on the serial port
+  for (int i = 0; i < 5; i++) {
+    if (i = 0) {
+      getNumOne(epoch[0]);
+      getNumTwo(epoch[1]);
     }
+    else if (i = 1) {
+      getNumOne(epoch[2]);
+      getNumTwo(epoch[3]);
+    }
+    else if (i = 2) {
+      getNumOne(epoch[4]);
+      getNumTwo(epoch[5]);
+    }
+    else if (i = 3) {
+      getNumOne(epoch[6]);
+      getNumTwo(epoch[7]);
+    }
+    else {
+      getNumOne(epoch[8]);
+      getNumTwo(epoch[9]);
+    }
+    displayNum(i, tmpArray, tmpArrayTwo);
   }
 }
 
-time_t requestSync()
-{
-  Serial.write(TIME_REQUEST);
-  return 0; // the time will be sent later in response to serial mesg
-}
+
+//Serial.println(static_cast<long int> (now()));
+
 
 void loop() {
-  getNumOne(epoch[0]);
-  getNumTwo(epoch[1]);
-  displayNum(tmpArray, tmpArrayTwo);
+
+  displayEpochTime(lInt);
+  
+  getNumOne(epochTest[0]);
+  getNumTwo(epochTest[1]);
+  // displayNum(tmpArray, tmpArrayTwo);
 
   //displayShow();
   for (int x = 0; x < 7; x++) {
-    Serial.println(epoch[x]);
+    Serial.println(epochTest[x]);
   };
 
   delay(10000);
   //lc.setLed(0,2,2,true);
 
-
-  //Time code
-  if (Serial.available()) {
-    processSyncMessage();
-  }
-  if (timeStatus() != timeNotSet) {
-    digitalClockDisplay();
-  }
 
 
 }
