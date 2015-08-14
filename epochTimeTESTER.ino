@@ -20,7 +20,7 @@ void setup() {
 
 
 //*********LED MATRIX TESTING************//
-long int lInt = 1234567890; //test int to parse to display
+long int lInt = 3333333333; //test int to parse to display
 
 int epochTest[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
                      (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10,
@@ -204,24 +204,26 @@ void displayEpochTime(long int eTime) {
 
   long int lInt = eTime;
 
+
   int epoch[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
-                   (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10,
+                   (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10
                   };
+ 
 
   for (int i = 0; i < 5; i++) {
-    if (i = 0) {
+    if (i == 0) {
       getNumOne(epoch[0]);
       getNumTwo(epoch[1]);
     }
-    else if (i = 1) {
+    else if (i == 1) {
       getNumOne(epoch[2]);
       getNumTwo(epoch[3]);
     }
-    else if (i = 2) {
+    else if (i == 2) {
       getNumOne(epoch[4]);
       getNumTwo(epoch[5]);
     }
-    else if (i = 3) {
+    else if (i == 3) {
       getNumOne(epoch[6]);
       getNumTwo(epoch[7]);
     }
@@ -229,7 +231,9 @@ void displayEpochTime(long int eTime) {
       getNumOne(epoch[8]);
       getNumTwo(epoch[9]);
     }
+    
     displayNum(i, tmpArray, tmpArrayTwo);
+    
   }
 }
 
@@ -239,19 +243,9 @@ void displayEpochTime(long int eTime) {
 
 void loop() {
 
-  displayEpochTime(lInt);
-  
-  getNumOne(epochTest[0]);
-  getNumTwo(epochTest[1]);
-  // displayNum(tmpArray, tmpArrayTwo);
+  displayEpochTime(1522222222);
 
-  //displayShow();
-  for (int x = 0; x < 7; x++) {
-    Serial.println(epochTest[x]);
-  };
-
-  delay(10000);
-  //lc.setLed(0,2,2,true);
+  lc.setLed(0, 0, 0, true);
 
 
 
