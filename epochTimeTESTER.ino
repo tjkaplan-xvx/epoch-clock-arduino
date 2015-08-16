@@ -2,9 +2,14 @@
 
 
 #include <LedControl.h> //  need the library
+#include <Time.h>
 
 LedControl lc = LedControl(12, 11, 10, 1); //  pin 12: DataIn, pin 11: CLK, pin 10: LOAD
 
+
+
+#define TIME_HEADER  "T"   // Header tag for serial time sync message
+#define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
 
 
 void setup() {
@@ -13,6 +18,11 @@ void setup() {
   lc.shutdown(0, false); // turn off power saving, enables display
   lc.setIntensity(0, 15); // sets brightness (0~15 possible values)
   lc.clearDisplay(0);// clear screen
+
+  while (!Serial) ; // Needed for Leonardo only
+  pinMode(13, OUTPUT);
+  setSyncProvider( requestSync);  //set function to call when sync required
+  Serial.println("Waiting for sync message");
 
 
 
@@ -205,10 +215,13 @@ void displayEpochTime(long int eTime) {
   long int lInt = eTime;
 
 
-  int epoch[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
+  int epochsx[10] = {(lInt % 10000000000) / 1000000000, (lInt % 1000000000) / 100000000, (lInt % 100000000) / 10000000, (lInt % 10000000) / 1000000,
                    (lInt % 1000000) / 100000, (lInt % 100000) / 10000, (lInt % 10000) / 1000, (lInt % 1000) / 100, (lInt % 100) / 10, lInt % 10
                   };
- 
+
+  int epoch[10] = {
+    lInt % 10, (lInt % 100) / 10, (lInt % 1000) / 100, (lInt % 10000) / 1000, (lInt % 100000) / 10000, (lInt % 1000000) / 100000, (lInt % 10000000) / 1000000, (lInt % 100000000) / 10000000, (lInt % 1000000000) / 100000000, (lInt % 10000000000) / 1000000000
+  };
 
   for (int i = 0; i < 5; i++) {
     if (i == 0) {
@@ -231,10 +244,43 @@ void displayEpochTime(long int eTime) {
       getNumOne(epoch[8]);
       getNumTwo(epoch[9]);
     }
-    
+
     displayNum(i, tmpArray, tmpArrayTwo);
-    
+
   }
+}
+
+
+
+//Time code
+
+void digitalClockDisplay() {
+  // digital clock display of the time
+  Serial.print(now());
+  displayEpochTime(static_cast<long int> (now()));
+
+  Serial.println();
+}
+
+
+
+
+void processSyncMessage() {
+  unsigned long pctime;
+  const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
+
+  if (Serial.find(TIME_HEADER)) {
+    pctime = Serial.parseInt();
+    if ( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
+      setTime(pctime); // Sync Arduino clock to the time received on the serial port
+    }
+  }
+}
+
+time_t requestSync()
+{
+  Serial.write(TIME_REQUEST);
+  return 0; // the time will be sent later in response to serial mesg
 }
 
 
@@ -243,9 +289,22 @@ void displayEpochTime(long int eTime) {
 
 void loop() {
 
-  displayEpochTime(1522222222);
+  //displayEpochTime(1522222222);
 
   lc.setLed(0, 0, 0, true);
+
+  if (Serial.available()) {
+    processSyncMessage();
+  }
+  if (timeStatus() != timeNotSet) {
+    digitalClockDisplay();
+  }
+  if (timeStatus() == timeSet) {
+    digitalWrite(13, HIGH); // LED on if synced
+  } else {
+    digitalWrite(13, LOW);  // LED off if needs refresh
+  }
+  //delay(1000);
 
 
 
